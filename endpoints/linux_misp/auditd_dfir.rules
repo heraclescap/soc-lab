@@ -1,0 +1,29 @@
+# Emplacement réel : /etc/audit/rules.d/dfir.rules  (sur VM MISP — 192.168.126.20)
+#
+# Règles auditd orientées DFIR pour la détection de persistence, privilege escalation
+# et exécution suspecte sur la VM MISP.
+#
+# Charger les règles :
+#   sudo augenrules --load
+#   sudo systemctl restart auditd
+#   sudo auditctl -l   # valider les règles chargées
+#
+# Note : ces règles utilisent -p wa (write + attribute change).
+# Les lectures (cat /etc/shadow) NE génèrent PAS d'alerte — comportement intentionnel.
+# Ajouter -p r si la lecture doit être capturée, mais attention au volume généré
+# par -S execve avec -p r (chaque appel système de lecture devient un événement).
+
+# Modifications de fichiers d'identité et de privilèges
+-w /etc/passwd  -p wa -k identity_modification
+-w /etc/shadow  -p wa -k identity_modification
+-w /etc/sudoers -p wa -k privilege_escalation
+-w /etc/crontab -p wa -k persistence
+
+# Exécution de commandes — syscall execve (toute exécution de processus)
+-a always,exit -F arch=b64 -S execve -k exec_commands
+
+# Connexions réseau sortantes — syscall connect
+-a always,exit -F arch=b64 -S connect -k network_connections
+
+# Exécution depuis /tmp — technique d'exécution fréquente dans les compromissions
+-w /tmp -p x -k suspicious_exec

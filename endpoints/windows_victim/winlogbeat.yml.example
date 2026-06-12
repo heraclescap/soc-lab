@@ -1,0 +1,56 @@
+# Emplacement réel : C:\Program Files\Winlogbeat\winlogbeat-8.19.16-windows-x86_64\winlogbeat.yml
+# (sur VM Victim — Windows 11 Pro, 192.168.126.30)
+#
+# Configuration Winlogbeat 8.19.16 pour la VM Victim.
+# Collecte les logs Windows/Sysmon et les envoie vers Logstash sur la VM ELK.
+#
+# Installation du service (PowerShell admin depuis le dossier Winlogbeat) :
+#   .\install-service-winlogbeat.ps1
+#   Set-Service winlogbeat -StartupType Automatic
+#   Start-Service winlogbeat
+#
+# Note importante : Winlogbeat NE peuple PAS event.module (contrairement à Filebeat
+# avec modules). Le routing Logstash utilise agent.type == "winlogbeat" pour diriger
+# ces events vers l'index soc-winlogbeat-*.
+
+winlogbeat.event_logs:
+
+  # Sysmon — source principale de détection DFIR (config SwiftOnSecurity)
+  - name: Microsoft-Windows-Sysmon/Operational
+    event_id: 1, 3, 7, 8, 10, 11, 12, 13, 15, 22
+
+  # Sécurité Windows — authentification, création de processus, comptes
+  - name: Security
+    event_id: 4624, 4625, 4648, 4688, 4698, 4720, 4732, 4756, 4768, 4769
+
+  # PowerShell Script Block Logging — capture le code déobfusqué avant exécution
+  # Critique pour détecter les techniques Atomic Red Team via PowerShell encodé
+  - name: Microsoft-Windows-PowerShell/Operational
+    event_id: 4103, 4104, 4105, 4106
+
+  - name: Windows PowerShell
+    event_id: 400, 403, 600, 800
+
+  # WMI — persistence et lateral movement (T1047, T1546.003)
+  - name: Microsoft-Windows-WMI-Activity/Operational
+
+  # Task Scheduler — persistence (T1053.005)
+  - name: Microsoft-Windows-TaskScheduler/Operational
+
+  # Windows Defender — détections natives (permet de corréler avec les simulations ART)
+  - name: Microsoft-Windows-Windows Defender/Operational
+
+  # Logs système généraux
+  - name: System
+  - name: Application
+
+output.logstash:
+  hosts: ["192.168.126.10:5044"]
+
+setup.kibana:
+  host: "http://192.168.126.10:5601"
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: C:\ProgramData\winlogbeat\Logs

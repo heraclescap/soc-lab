@@ -1,0 +1,16 @@
+# Emplacement réel : /etc/logstash/pipelines.yml
+#
+# Architecture multi-pipeline Logstash du SOC Lab.
+# Pipeline skoupa   : point d'entrée Beats (port 5044) → internal pipe to-es
+# Pipeline straight-es : routing par source → index soc-* dans Elasticsearch
+#
+# Copier les fichiers de config pipeline dans /etc/logstash/pipeline/ :
+#   sudo mkdir -p /etc/logstash/pipeline
+#   sudo cp skoupa.conf /etc/logstash/pipeline/skoupa.conf
+#   sudo cp straight_es.conf /etc/logstash/pipeline/straight_es.conf
+
+- pipeline.id: skoupa
+  path.config: "/etc/logstash/pipeline/skoupa.conf"
+
+- pipeline.id: straight-es
+  path.config: "/etc/logstash/pipeline/straight_es.conf"

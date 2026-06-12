@@ -1,0 +1,35 @@
+# Emplacement réel : /etc/filebeat/filebeat.yml  (sur VM MISP — 192.168.126.20)
+#
+# Configuration Filebeat pour la VM MISP.
+# Collecte les logs auditd (syscalls) et system (syslog + auth) et les envoie
+# vers Logstash sur la VM ELK.
+#
+# Output : output.logstash vers 192.168.126.10:5044
+# (pas output.elasticsearch — ce Filebeat n'a pas besoin des ingest pipelines ECS)
+#
+# Avant le premier démarrage, charger les pipelines ingest :
+#   sudo filebeat setup --pipelines --modules system,auditd
+#   sudo systemctl enable filebeat
+#   sudo systemctl start filebeat
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+filebeat.modules:
+  - module: system
+    syslog:
+      enabled: true
+    auth:
+      enabled: true
+
+  - module: auditd
+    log:
+      enabled: true
+      var.paths: ["/var/log/audit/audit.log"]
+
+output.logstash:
+  hosts: ["192.168.126.10:5044"]
+
+setup.kibana:
+  host: "http://192.168.126.10:5601"
