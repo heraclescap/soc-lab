@@ -24,7 +24,7 @@ WINDOWS 11 HOST — 16 Go RAM / 50 Go disque
      │    └── Filebeat 8.19.16       (module threatintel → ES direct)
      │
      ├── VM MISP — Ubuntu 22.04
-     │    192.168.126.20  (2 Go RAM / 15 Go thin)
+     │    192.168.126.20  (2 Go RAM / 20 Go thin)
      │    ├── MISP 2.4 + MariaDB + Redis + Apache
      │    ├── Filebeat 8.19.16 → Logstash :5044
      │    └── Auditd (règles DFIR)
