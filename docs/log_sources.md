@@ -1,8 +1,10 @@
-# Sources de logs du SOC Lab
+# Sources de logs
+
+Tableau de référence de tout ce que j'ingère dans ce lab.
 
 ---
 
-## Vue d'ensemble des sources
+## Vue d'ensemble
 
 | Source | VM | Agent | Index ES | Protocole |
 |--------|----|-------|----------|-----------|
@@ -68,8 +70,8 @@
 
 ## Règles auditd actives (VM MISP)
 
-| Règle | Clé | Type d'événement capturé |
-|-------|-----|--------------------------|
+| Règle | Clé | Ce qui est capturé |
+|-------|-----|--------------------|
 | `-w /etc/passwd -p wa` | identity_modification | Modification du fichier passwd |
 | `-w /etc/shadow -p wa` | identity_modification | Modification du fichier shadow |
 | `-w /etc/sudoers -p wa` | privilege_escalation | Modification des sudoers |
@@ -78,22 +80,21 @@
 | `-a always,exit -F arch=b64 -S connect` | network_connections | Connexions réseau sortantes |
 | `-w /tmp -p x` | suspicious_exec | Exécution depuis /tmp |
 
-**Note** : `-p wa` uniquement (write + attribute change). Les lectures ne génèrent pas d'alerte.
+Note : `-p wa` uniquement. Les lectures ne génèrent pas d'événement.
 
 ---
 
 ## Volume IOCs MISP
 
-| Feed | Type | Volume approximatif |
-|------|------|---------------------|
-| CIRCL OSINT Feed | MISP JSON | 15 000+ IOCs |
-| Feodo Tracker | CSV (IPs C2) | ~500 IPs |
-| URLhaus | MISP JSON | 5 000+ URLs |
-| Threatfox | MISP JSON | 3 000+ IOCs |
-| **Total threat.indicator.ip** | — | **> 22 000** |
+| Feed | Volume approximatif |
+|------|---------------------|
+| CIRCL OSINT Feed | 15 000+ IOCs |
+| Feodo Tracker | ~500 IPs |
+| URLhaus | 5 000+ URLs |
+| Threatfox | 3 000+ IOCs |
+| **Total threat.indicator.ip** | **> 22 000** |
 
-Les IOCs sont dans l'index `filebeat-8.19.16` (data stream Elasticsearch).
-Le champ `threat.indicator.ip` est peuplé par les ingest pipelines Filebeat threatintel.
+Les IOCs sont dans l'index `filebeat-8.19.16`. Le champ `threat.indicator.ip` est peuplé par les ingest pipelines Filebeat threatintel.
 
 ---
 
@@ -103,4 +104,4 @@ Le champ `threat.indicator.ip` est peuplé par les ingest pipelines Filebeat thr
 |----------|---------|------------|
 | `soc-template` | `soc-*` | `soc-policy` |
 
-Policy `soc-policy` : hot 5 GB/3j → warm 3j (readonly+shrink+forcemerge) → delete 14j.
+Policy `soc-policy` : hot 5 GB/3j → warm 3j (readonly + shrink + forcemerge) → delete 14j.

@@ -1,20 +1,19 @@
-# SOC Lab — Homelab SIEM + Threat Intel
+# SOC Lab - Homelab SIEM + Threat Intel
 
-Lab de détection et d'analyse construit sur VMware Workstation / Windows 11 Pro.  
-Stack ELK 8.19.16 + MISP 2.4 + Sysmon + Atomic Red Team sur réseau NAT isolé.
+J'ai monté ce lab pour apprendre à détecter des attaques en conditions réelles, pas sur des démos packagées. Tout tourne sur ma machine Windows 11 Pro via VMware Workstation, avec 16 Go de RAM et 50 Go de disque. Stack ELK 8.19.16 + MISP 2.4 + Sysmon + Atomic Red Team sur VMnet8 NAT.
 
-> **Use Cases de détection** : dans le repo séparé [`soc-lab-detection-engineering`](../soc-lab-detection-engineering/).
+> **Use Cases de détection** : dans mon repo [`soc-lab-detection-engineering`](https://github.com/heraclescap/soc-lab-detection-engineering).
 
 ---
 
 ## Architecture réseau
 
 ```
-WINDOWS 11 HOST — 16 Go RAM / 50 Go disque
+WINDOWS 11 HOST - 16 Go RAM / 50 Go disque
 │
 └── VMware VMnet8 (NAT) 192.168.126.0/24
      │
-     ├── VM ELK — Ubuntu 22.04
+     ├── VM ELK - Ubuntu 22.04
      │    192.168.126.10  (4 Go RAM / 25 Go thin)
      │    ├── Elasticsearch 8.19.16  (heap 1024 Mo, TLS auto)
      │    ├── Kibana 8.19.16         (heap 512 Mo, port 5601)
@@ -23,13 +22,13 @@ WINDOWS 11 HOST — 16 Go RAM / 50 Go disque
      │    │    └── Pipeline straight-es (routing agent.type → soc-*)
      │    └── Filebeat 8.19.16       (module threatintel → ES direct)
      │
-     ├── VM MISP — Ubuntu 22.04
+     ├── VM MISP - Ubuntu 22.04
      │    192.168.126.20  (2 Go RAM / 15 Go thin)
      │    ├── MISP 2.4 + MariaDB + Redis + Apache
      │    ├── Filebeat 8.19.16 → Logstash :5044
      │    └── Auditd (règles DFIR)
      │
-     └── VM Victim — Windows 11 Pro
+     └── VM Victim - Windows 11 Pro
           192.168.126.30  (4 Go RAM / 40 Go thin)
           ├── Sysmon 64 (config SwiftOnSecurity)
           ├── Winlogbeat 8.19.16 → Logstash :5044
@@ -49,7 +48,7 @@ WINDOWS 11 HOST — 16 Go RAM / 50 Go disque
 | Filebeat (threatintel) | 8.19.16 | ELK | Ingestion IOCs MISP → ES direct |
 | MISP | 2.4 | MISP | Threat intelligence, feeds IOCs |
 | Filebeat (auditd/system) | 8.19.16 | MISP | Logs Linux → Logstash |
-| Auditd | — | MISP | Audit syscalls Linux |
+| Auditd | - | MISP | Audit syscalls Linux |
 | Winlogbeat | 8.19.16 | Victim | Logs Windows → Logstash |
 | Sysmon | 64 (SwiftOnSecurity) | Victim | Télémétrie endpoint Windows |
 | Atomic Red Team | latest | Victim | Simulation d'attaques MITRE ATT&CK |
@@ -93,8 +92,7 @@ Kibana Security
 | `soc-unknown-YYYY.MM.dd` | Fallback Logstash | Events sans event.module ni agent.type connu |
 | `filebeat-8.19.16` | Filebeat threatintel / VM ELK | Data stream IOCs MISP |
 
-> **Pourquoi `soc-*` et pas `logs-*`** : Logstash ne peut pas écrire dans les data streams
-> Elastic 8.x avec `op_type: index`. Le préfixe `soc-` contourne ce conflit.
+> J'utilise le préfixe `soc-*` et pas `logs-*` : Logstash ne peut pas écrire dans les data streams Elastic 8.x avec `op_type: index`. `soc-*` contourne le problème.
 
 ---
 
@@ -110,10 +108,12 @@ Kibana Security
 
 ## Contraintes opérationnelles
 
-- **3 VMs ne tournent jamais simultanément** — contrainte RAM (16 Go total)
-- **Mode config** : ELK + MISP (Filebeat threatintel actif)
-- **Mode attaque** : ELK + Victim (Filebeat threatintel arrêté pour libérer ~400 Mo)
-- Voir [`docs/modes_travail.md`](docs/modes_travail.md) pour les commandes de basculement
+Je ne fais jamais tourner les 3 VMs en même temps - 16 Go ne suffisent pas. Je travaille en deux modes :
+
+- **Mode config** : ELK + MISP actifs, Filebeat threatintel tourne
+- **Mode attaque** : ELK + Victim actifs, Filebeat arrêté pour libérer ~400 Mo
+
+Voir [`docs/modes_travail.md`](docs/modes_travail.md) pour les commandes de basculement.
 
 ---
 
@@ -122,10 +122,16 @@ Kibana Security
 | Fichier | Contenu |
 |---------|---------|
 | [`architecture/network_design.md`](architecture/network_design.md) | Topologie réseau, adressage IP, ports |
-| [`architecture/known_limitations.md`](architecture/known_limitations.md) | Limitations techniques et compromis |
+| [`architecture/known_limitations.md`](architecture/known_limitations.md) | Ce que j'ai appris à mes dépens |
 | [`elk/setup_guide.md`](elk/setup_guide.md) | Installation et configuration ELK |
 | [`misp/setup_guide.md`](misp/setup_guide.md) | Installation MISP, quirks documentés |
 | [`misp/feeds_config.md`](misp/feeds_config.md) | Feeds activés avec justifications |
 | [`docs/log_sources.md`](docs/log_sources.md) | Sources de logs, Event IDs, règles auditd |
-| [`docs/modes_travail.md`](docs/modes_travail.md) | Basculement config/attaque, santé du lab |
-| [`docs/known_limitations.md`](docs/known_limitations.md) | Ce qu'il faut savoir pour travailler avec le lab |
+| [`docs/modes_travail.md`](docs/modes_travail.md) | Comment je bascule entre les modes, santé du lab |
+| [`docs/known_limitations.md`](docs/known_limitations.md) | Ce qu'il faut savoir avant de travailler avec ce lab |
+
+---
+
+## Licence
+
+MIT - voir [LICENSE](LICENSE).

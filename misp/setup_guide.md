@@ -1,6 +1,6 @@
 # MISP Setup Guide
 
-Installation de MISP 2.4 sur VM Ubuntu 22.04 (192.168.126.20).
+Installation de MISP 2.4 sur ma VM MISP - Ubuntu 22.04, IP 192.168.126.20.
 
 ---
 
@@ -11,7 +11,7 @@ OS    : Ubuntu 22.04 LTS Server
 RAM   : 2048 Mo
 CPU   : 2 cœurs
 Disk  : 15 Go thin provisioned
-Net   : VMnet8 NAT — IP statique 192.168.126.20/24
+Net   : VMnet8 NAT - IP statique 192.168.126.20/24
 ```
 
 IP statique via `/etc/netplan/00-installer-config.yaml` :
@@ -34,8 +34,7 @@ network:
 
 ## 1. Installation MISP
 
-Le script officiel installe Apache, MariaDB, Redis, PHP et l'application MISP.
-Durée estimée : **20-30 minutes**.
+Le script officiel installe Apache, MariaDB, Redis, PHP et l'application. Compter 20-30 minutes.
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -44,14 +43,11 @@ chmod +x /tmp/misp-install.sh
 sudo /tmp/misp-install.sh -A
 ```
 
-### Quirks du script d'installation — lire avant de lancer
+### Trois problèmes que j'ai rencontrés - à lire avant de lancer
 
 **1. Mot de passe MariaDB régénéré à chaque run**
 
-Le script régénère `database.php` avec un nouveau mot de passe aléatoire sans mettre à jour
-l'utilisateur MariaDB. En cas d'échec et de re-run, l'utilisateur MariaDB est désynchronisé.
-
-Workaround — recréer l'utilisateur manuellement :
+Le script régénère `database.php` avec un nouveau mot de passe aléatoire sans mettre à jour l'utilisateur MariaDB. Si le script échoue et que je le relance, MariaDB rejette toutes les connexions de MISP. Il faut recréer l'utilisateur manuellement :
 
 ```bash
 sudo mysql -u root
@@ -67,27 +63,24 @@ EXIT;
 
 **2. Boucle infinie sur `faup`**
 
-Le clone git de la librairie `faup` peut boucler indéfiniment à ~68% de progression.
-Interrompre avec **Ctrl+C** et continuer l'installation manuellement depuis l'étape suivante.
+Le clone git de `faup` peut boucler à ~68% sans jamais terminer. Ctrl+C et continuer manuellement.
 
 **3. Workers MISP manquants**
 
-Après installation, vérifier que les 5 queues de workers tournent :
-`default`, `prio`, `cache`, `email`, `update`.
-
-La queue `default` est souvent absente au premier démarrage :
+Après installation, la queue `default` est souvent absente :
 
 ```bash
 sudo systemctl restart misp-workers
 sudo systemctl status misp-workers
 ```
 
+Il doit y avoir 5 queues actives : `default`, `prio`, `cache`, `email`, `update`.
+
 ---
 
 ## 2. Tuning MariaDB pour 2 Go de RAM
 
-> Chemin de config MariaDB sur Ubuntu 22.04 : `/etc/mysql/mariadb.conf.d/50-server.cnf`
-> (pas `/etc/mysql/mysql.conf.d/mysqld.cnf` qui est le chemin MySQL classique)
+Le chemin de config sur Ubuntu 22.04 est `/etc/mysql/mariadb.conf.d/50-server.cnf` et pas `/etc/mysql/mysql.conf.d/mysqld.cnf` (piège classique).
 
 ```bash
 sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -101,8 +94,7 @@ innodb_log_file_size    = 64M
 max_connections         = 50
 ```
 
-> Ne pas définir `innodb_log_file_size` à une valeur inférieure aux fichiers de log
-> existants — MariaDB refuserait de démarrer.
+> Ne pas descendre `innodb_log_file_size` en dessous de la taille des fichiers de log existants, MariaDB refuserait de démarrer.
 
 ```bash
 sudo systemctl restart mariadb
@@ -112,31 +104,29 @@ sudo systemctl restart mariadb
 
 ## 3. Premier accès
 
-Depuis le navigateur Windows host : `https://192.168.126.20`
+Depuis mon navigateur Windows : `https://192.168.126.20`
 
 ```
 Login    : admin@admin.test
 Password : admin
 ```
 
-**Changer le mot de passe immédiatement** :
-MISP → Administration → Edit profile → Change password
+Changer le mot de passe immédiatement : MISP → Administration → Edit profile → Change password.
 
 ---
 
-## 4. Feeds — voir `feeds_config.md`
+## 4. Feeds - voir [`feeds_config.md`](feeds_config.md)
 
-Activer les feeds dans MISP → Sync Actions → Feeds.
-Pour chaque feed activé, cliquer **Fetch and store all events**.
+J'active les feeds dans MISP → Sync Actions → Feeds. Pour chaque feed activé, je clique **Fetch and store all events**.
 
-Scheduled Tasks pour mise à jour automatique :
-MISP → Administration → Scheduled Tasks → `fetch_feeds` + `cache_feeds` : Frequency 24h
+Scheduled Tasks pour la mise à jour automatique :
+MISP → Administration → Scheduled Tasks → `fetch_feeds` + `cache_feeds` en Frequency 24h.
 
 ---
 
 ## 5. Clé API pour ELK
 
-MISP → Administration → Auth Keys → Add authentication key
+MISP → Administration → Auth Keys → Add authentication key :
 
 ```
 Permissions  : read-only
@@ -144,22 +134,17 @@ IP whitelist : 192.168.126.0/24
 Commentaire  : ELK threatintel integration
 ```
 
-> La whitelist doit couvrir la plage `/24` complète (pas seulement l'IP de la VM ELK).
-> Mettre uniquement `192.168.126.10` fonctionne aussi mais la plage `/24` est plus robuste
-> si des IPs changent.
->
-> **Copier la clé générée immédiatement** — elle ne sera plus affichée après fermeture de la page.
+J'utilise la plage `/24` entière plutôt que la seule IP de la VM ELK. Plus souple si les IPs évoluent.
 
-La clé servira dans `elk/filebeat-threatintel/filebeat.yml.example` (`var.api_token`).
+La clé générée va dans `var.api_token` de [`../elk/filebeat-threatintel/filebeat.yml.example`](../elk/filebeat-threatintel/filebeat.yml.example). Elle ne s'affiche qu'une fois.
 
 ---
 
-## 6. Validation de l'intégration MISP → ELK
+## 6. Validation
 
 Sur VM ELK, après démarrage du Filebeat threatintel :
 
 ```bash
-# Compter les IOCs avec IP
 curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
   "https://192.168.126.10:9200/filebeat-8.19.16/_count?pretty" \
   -H "Content-Type: application/json" \

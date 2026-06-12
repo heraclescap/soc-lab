@@ -1,18 +1,16 @@
-# Architecture réseau du SOC Lab
+# Architecture réseau
 
 ## Topologie VMnet8 NAT
 
-Tout le lab est sur un unique segment VMnet8 NAT fourni par VMware Workstation.
-Ce choix donne accès à Internet pour les feeds MISP et les téléchargements de paquets,
-sans exposition publique des services (NAT masque les VMs derrière l'IP du host).
+J'ai mis tout le lab sur un seul segment VMnet8 NAT. C'est le choix le plus simple qui fonctionne : accès Internet pour les feeds MISP, et les VMs restent invisibles depuis l'extérieur.
 
 ```
 WINDOWS 11 HOST
 │
-└── VMnet8 (NAT) — 192.168.126.0/24
+└── VMnet8 (NAT) - 192.168.126.0/24
      Gateway   : 192.168.126.2   (VMware NAT engine)
      DNS (ext) : 8.8.8.8
-     DHCP pool : .128 → .254     (réservé VMware — ne pas utiliser pour IPs statiques)
+     DHCP pool : .128 → .254     (réservé VMware - ne pas utiliser pour IPs statiques)
      │
      ├── VM ELK      192.168.126.10
      ├── VM MISP     192.168.126.20
@@ -29,8 +27,7 @@ WINDOWS 11 HOST
 | MISP | 192.168.126.20 | Ubuntu 22.04 LTS Server | 2 Go | 15 Go thin |
 | Victim | 192.168.126.30 | Windows 11 Pro | 4 Go | 40 Go thin |
 
-Toutes les IPs sont **statiques** (configurées dans `/etc/netplan/` sur Linux,
-via `New-NetIPAddress` sur Windows). La plage DHCP VMware (.128-.254) n'est pas utilisée.
+Toutes les IPs sont statiques. J'ai configuré ça via `/etc/netplan/` sur Linux et `New-NetIPAddress` sur Windows. Si je laissais le DHCP, les configs Filebeat/Winlogbeat qui pointent sur `192.168.126.10:5044` en dur cesseraient de fonctionner au prochain reboot.
 
 ---
 
@@ -42,11 +39,9 @@ via `New-NetIPAddress` sur Windows). La plage DHCP VMware (.128-.254) n'est pas 
 | 5601 | TCP | ELK | Kibana UI (HTTP) | Host + VMs |
 | 5044 | TCP | ELK | Logstash Beats input | VM MISP + VM Victim |
 | 443 | TCP | MISP | MISP Web UI (HTTPS) | Host |
-| — | — | Victim | Aucun port exposé | — |
+| - | - | Victim | Aucun port exposé | - |
 
-> Kibana est accessible depuis le navigateur Windows host à `http://192.168.126.10:5601`.  
-> MISP est accessible à `https://192.168.126.20`.  
-> Logstash n'accepte que les connexions Beats (port 5044) — sans TLS sur ce lab.
+Depuis mon navigateur Windows : Kibana sur `http://192.168.126.10:5601`, MISP sur `https://192.168.126.20`.
 
 ---
 
@@ -70,20 +65,10 @@ Host Windows
 
 ---
 
-## Choix réseau justifiés
+## Pourquoi ces choix
 
-**Pourquoi VMnet8 NAT et pas VMnet1 Host-only**  
-Les feeds MISP (Feodo, CIRCL, URLhaus, Threatfox) nécessitent un accès Internet direct
-pour se mettre à jour. VMnet1 Host-only isolé ne permet pas cet accès. Le NAT maintient
-l'isolement (les VMs ne sont pas accessibles de l'extérieur) tout en autorisant les
-connexions sortantes.
+**VMnet8 NAT et pas VMnet1 Host-only** : les feeds MISP (Feodo, CIRCL, URLhaus, Threatfox) ont besoin d'Internet pour se mettre à jour. VMnet1 Host-only coupe ça. Le NAT garde les VMs isolées tout en autorisant les connexions sortantes.
 
-**Pourquoi Logstash sans TLS sur le port 5044**  
-Lab local NAT uniquement. Aucun trafic Beats ne traverse Internet. Activer TLS sur Logstash
-ajoute une complexité de gestion des certificats sans bénéfice de sécurité dans ce contexte.
+**Logstash sans TLS sur le port 5044** : c'est un lab local NAT, aucun trafic Beats ne passe sur Internet. Ajouter TLS sur Logstash demanderait de gérer des certificats pour un gain de sécurité nul dans ce contexte.
 
-**Pourquoi IPs statiques et pas DHCP**  
-Les configurations Filebeat/Winlogbeat référencent `192.168.126.10:5044` en dur.
-Un changement d'IP DHCP casserait le pipeline de collecte. Les IPs statiques évitent
-tout redémarrage de configuration après reboot des VMs.
-
+**IPs statiques** : les configs Filebeat et Winlogbeat référencent `192.168.126.10:5044` en dur. Un changement DHCP suffirait à casser l'ingestion de logs.

@@ -1,24 +1,22 @@
-# Modes de travail du SOC Lab
+# Comment je travaille avec le lab
 
-Le lab fonctionne selon deux modes exclusifs — les 3 VMs ne tournent **jamais simultanément**
-(contrainte RAM : 16 Go total sur le host Windows 11).
+Je ne fais jamais tourner les 3 VMs en même temps - 16 Go de RAM ne suffisent pas. Je bascule entre deux modes selon ce que je fais.
 
 ---
 
 ## Mode config
 
-**Usage** : mise à jour des feeds MISP, création/affinage de règles de détection Kibana,
-analyse des IOCs, consultation des alertes Indicator Match existantes.
+Je l'utilise pour mettre à jour les feeds MISP, créer ou affiner des règles de détection, analyser les IOCs.
 
 ```
 VMs actives  : ELK (192.168.126.10) + MISP (192.168.126.20)
 VM suspendue : Victim (192.168.126.30)
-Filebeat ELK : actif — collecte des IOCs MISP toutes les 10 min
+Filebeat ELK : actif - collecte les IOCs MISP toutes les 10 min
 ```
 
-**Tâches typiques :**
+Ce que je fais en mode config :
 - Mettre à jour les feeds MISP (Fetch and store all events)
-- Créer ou affiner des règles de détection dans Kibana Security
+- Créer ou affiner des règles dans Kibana Security
 - Vérifier les nouveaux IOCs dans la Data View `MISP IOCs` (filebeat-8.19.16)
 - Analyser les alertes Indicator Match dans Kibana Security → Alerts
 - Ajuster les règles prebuilt Elastic
@@ -27,62 +25,57 @@ Filebeat ELK : actif — collecte des IOCs MISP toutes les 10 min
 
 ## Mode attaque
 
-**Usage** : simulation de techniques MITRE ATT&CK avec Atomic Red Team, observation des
-alertes en temps réel, reconstruction de timelines, écriture de règles EQL.
+Je l'utilise pour les simulations Atomic Red Team, observer les alertes en temps réel, reconstruire des timelines.
 
 ```
 VMs actives  : ELK (192.168.126.10) + Victim (192.168.126.30)
 VM suspendue : MISP (192.168.126.20)
-Filebeat ELK : arrêté — libère ~400 Mo de RAM nécessaires à la VM Victim
+Filebeat ELK : arrêté - libère ~400 Mo de RAM
 ```
 
-**Tâches typiques :**
+Ce que je fais en mode attaque :
 - Lancer une technique Atomic Red Team (PowerShell admin sur VM Victim)
 - Observer les alertes Kibana Security en temps réel
 - Reconstruire la timeline dans Kibana → Timeline
 - Corréler Event IDs Sysmon → technique MITRE ATT&CK
-- Écrire une règle EQL si aucune alerte n'a été déclenchée (voir repo `soc-lab-detection`)
+- Écrire une règle EQL si aucune alerte n'est déclenchée (voir repo `soc-lab-detection-engineering`)
 - Restaurer le snapshot "clean-sysmon-winlogbeat" avant la prochaine simulation
 
 ---
 
 ## Commandes de basculement
 
-### Passer en mode attaque (sur VM ELK)
+### Passer en mode attaque
+
+Sur VM ELK :
 
 ```bash
-# 1. Arrêter Filebeat pour libérer ~400 Mo de RAM
 sudo systemctl stop filebeat
-
-# 2. Vérifier l'espace libéré
-free -m
+free -m  # vérifier la RAM libérée
 ```
 
-Puis dans VMware Workstation :
-- Suspendre la VM MISP → VM → Suspend (2 secondes)
-- Démarrer/Reprendre la VM Victim
+Puis dans VMware : suspendre MISP, démarrer/reprendre Victim.
 
-### Revenir en mode config (sur VM ELK)
+### Revenir en mode config
+
+Sur VM ELK :
 
 ```bash
-# 1. Redémarrer Filebeat pour reprendre la collecte IOCs
 sudo systemctl start filebeat
-
-# 2. Vérifier que Filebeat collecte bien
-sudo journalctl -fu filebeat | grep "events published"
+sudo journalctl -fu filebeat | grep "events published"  # vérifier que la collecte reprend
 ```
 
-Puis dans VMware Workstation :
-- Suspendre la VM Victim
-- Reprendre la VM MISP (5-10 secondes vs 2-3 min pour un boot complet)
+Puis dans VMware : suspendre Victim, reprendre MISP.
+
+> VMware → VM → Suspend prend 2 secondes. La reprendre prend 5-10 secondes, contre 2-3 minutes pour un boot complet. Je suspends toujours plutôt que d'éteindre.
 
 ---
 
 ## Vérification santé du lab
 
-À exécuter sur **VM ELK** après tout redémarrage ou changement de mode.
+À faire sur VM ELK après tout redémarrage ou changement de mode.
 
-### État des services ELK
+### État des services
 
 ```bash
 sudo systemctl status elasticsearch kibana logstash | grep -E "Active|●"
@@ -90,7 +83,7 @@ sudo systemctl status elasticsearch kibana logstash | grep -E "Active|●"
 
 Tous doivent être `active (running)`.
 
-### Ordre de démarrage (après reboot de la VM ELK)
+### Ordre de démarrage après reboot de la VM ELK
 
 ```bash
 sudo systemctl start elasticsearch
@@ -102,25 +95,25 @@ sudo systemctl start logstash
 sudo systemctl start filebeat
 ```
 
-### Validation des pipelines Logstash
+### Pipelines Logstash actifs
 
 ```bash
 sudo journalctl -u logstash | grep "Pipeline started" | tail -5
-# Doit afficher les 2 pipelines : skoupa et straight-es
+# Doit afficher skoupa et straight-es
 ```
 
 ### Espace disque
 
 ```bash
 df -h /
-# Surveiller si > 80% — les index soc-* grossissent pendant les simulations
+# Je surveille si > 80% - les index soc-* grossissent pendant les simulations
 ```
 
 ### RAM disponible
 
 ```bash
 free -m
-# Mode config : ~1.5-2 Go libres sur 4 Go
+# Mode config : ~1,5-2 Go libres sur 4 Go
 # Mode attaque (sans Filebeat) : ~400 Mo de plus
 ```
 
@@ -131,7 +124,7 @@ curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
   "https://192.168.126.10:9200/_cat/indices/soc-*?v&s=index"
 ```
 
-### Compter les IOCs MISP (mode config)
+### IOCs MISP (mode config)
 
 ```bash
 curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
@@ -141,7 +134,7 @@ curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
 # Attendu : count > 20000
 ```
 
-### Alertes Kibana Security ouvertes
+### Alertes ouvertes
 
 ```bash
 curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
@@ -149,13 +142,3 @@ curl -sk -u elastic:'<MOT_DE_PASSE_ELASTIC>' \
   -H "Content-Type: application/json" \
   -d '{"query":{"term":{"kibana.alert.workflow_status":"open"}}}'
 ```
-
----
-
-## Utilisation VMware Suspend vs Shutdown
-
-Toujours **suspendre** les VMs inutilisées plutôt que les éteindre :
-- Suspend : 2 secondes → la VM reprend en 5-10 secondes
-- Shutdown : RAM libérée, mais démarrage = 2-3 minutes + services à relancer
-
-Exception : arrêt planifié long (> 8h) → shutdown pour économiser le disque.
