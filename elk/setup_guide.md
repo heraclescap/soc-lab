@@ -220,6 +220,8 @@ Kibana → Stack Management → Data Views → Create data view :
 |-----|---------------|-----------|
 | SOC Logs | `soc-*` | @timestamp |
 | Windows Logs | `soc-winlogbeat-*` | @timestamp |
+| Linux Auditd Logs | `soc-auditd-*` | @timestamp |
+| Linux System Logs | `soc-system-*` | @timestamp |
 | MISP IOCs | `filebeat-*` | @timestamp |
 
 ![Data Views configurées dans Kibana Stack Management](images/data_views.png)

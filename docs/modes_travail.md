@@ -17,7 +17,7 @@ Filebeat ELK : actif - collecte les IOCs MISP toutes les 10 min
 Ce que j'ai fait en mode config :
 - Mettre à jour les feeds MISP (Fetch and store all events)
 - Créer ou affiner des règles dans Kibana Security
-- Vérifier les nouveaux IOCs dans la Data View `MISP IOCs` (filebeat-8.19.16)
+- Vérifier les nouveaux IOCs dans la Data View `MISP IOCs` (filebeat-*)
 - Analyser les alertes Indicator Match dans Kibana Security → Alerts
 - Ajuster les règles prebuilt Elastic
 

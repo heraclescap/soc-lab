@@ -28,11 +28,11 @@ J'ai mis un Filebeat dédié sur la VM ELK avec `output.elasticsearch` direct, s
 
 ---
 
-## Data stream `filebeat-8.19.16` vs pattern `filebeat-*`
+## Data stream `filebeat-8.19.16` et pattern `filebeat-*`
 
-En Elastic 8.x, Filebeat écrit dans un data stream dont le nom exact est `filebeat-8.19.16`. Le pattern `filebeat-*` dans les règles Kibana Security ne matche pas les backing indices `.ds-filebeat-8.19.16-YYYY.MM.dd-000001`.
+En Elastic 8.x, Filebeat écrit dans un data stream dont le nom exact est `filebeat-8.19.16`. Le pattern `filebeat-*` fonctionne comme indicator index dans la règle Indicator Match - Kibana Security résout correctement le pattern vers le data stream sous-jacent.
 
-Dans la règle Indicator Match, j'utilise `filebeat-8.19.16` comme indicator index, pas `filebeat-*`.
+Dans la règle Indicator Match, j'ai utilisé `filebeat-*` comme indicator index.
 
 ---
 

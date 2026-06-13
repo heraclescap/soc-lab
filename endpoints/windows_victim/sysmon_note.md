@@ -35,13 +35,13 @@ C:\Sysmon\Sysmon64.exe -accepteula -i C:\Sysmon\config.xml
 
 ## Corrélation avec la règle Indicator Match Kibana
 
-L'Event ID 3 (Network Connection) est la source principale de mes alertes MISP IoC Match. Sysmon peuple `winlog.event_data.DestinationIp` et `winlog.event_data.SourceIp`, qui sont ensuite corrélés avec `threat.indicator.ip` dans `filebeat-8.19.16`.
+L'Event ID 3 (Network Connection) est la source principale de mes alertes MISP IoC Match. Sysmon peuple `winlog.event_data.DestinationIp` et `winlog.event_data.SourceIp`, qui sont ensuite corrélés avec `threat.indicator.ip` dans `filebeat-*`.
 
 ```
 soc-winlogbeat-*
   winlog.event_data.DestinationIp  OR  winlog.event_data.SourceIp
     MATCHES
-  filebeat-8.19.16
+  filebeat-*
     threat.indicator.ip
 ```
 

@@ -76,7 +76,7 @@ VM ELK
 
 Kibana Security
   Règle Indicator Match
-    soc-winlogbeat-* (DestinationIp) ↔ filebeat-8.19.16 (threat.indicator.ip)
+    soc-winlogbeat-* (DestinationIp) ↔ filebeat-* (threat.indicator.ip)
       → Alerte High si match
 ```
 
@@ -104,6 +104,8 @@ Kibana Security
 |-----|---------|-------|
 | SOC Logs | `soc-*` | Tous les logs du lab |
 | Windows Logs | `soc-winlogbeat-*` | Logs Windows/Sysmon uniquement |
+| Linux Auditd Logs | `soc-auditd-*` | Logs auditd VM MISP |
+| Linux System Logs | `soc-system-*` | Syslog et auth VM MISP |
 | MISP IOCs | `filebeat-*` | Threat intelligence MISP |
 
 ![Data Views configurées dans Kibana Stack Management](elk/images/data_views.png)
