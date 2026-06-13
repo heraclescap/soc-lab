@@ -36,10 +36,9 @@ Si les events arrivent dans `soc-unknown-*` plutôt que `soc-winlogbeat-*`, le p
 
 Je vérifie dans cet ordre :
 
-1. **Index indicator** : doit être `filebeat-8.19.16`, pas `filebeat-*`
-2. **Mapping OR** : les deux mappings (DestinationIp et SourceIp) doivent être en OR
-3. **Filtre temporel** : le filtre `@timestamp >= "now-30d/d"` exclut les IOCs anciens. Si `threat.indicator.ip` est vide, les ingest pipelines n'ont pas tourné - vérifier que le Filebeat threatintel utilise bien `output.elasticsearch`
-4. **Règle désactivée** : Kibana Security → Rules → vérifier que la règle est "Enabled"
+1. **Mapping OR** : les deux mappings (DestinationIp et SourceIp) doivent être en OR
+2. **Filtre temporel** : le filtre `@timestamp >= "now-30d/d"` exclut les IOCs anciens. Si `threat.indicator.ip` est vide, les ingest pipelines n'ont pas tourné - vérifier que le Filebeat threatintel utilise bien `output.elasticsearch`
+3. **Règle désactivée** : Kibana Security → Rules → vérifier que la règle est "Enabled"
 
 ![Configuration de la règle Indicator Match dans Kibana Security](images/indicator_rule.png)
 
