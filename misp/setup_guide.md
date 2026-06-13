@@ -117,7 +117,7 @@ Changer le mot de passe immédiatement : MISP → Administration → Edit profil
 
 ## 4. Feeds - voir [`feeds_config.md`](feeds_config.md)
 
-J'active les feeds dans MISP → Sync Actions → Feeds. Pour chaque feed activé, je clique **Fetch and store all events**.
+J'ai activé les feeds dans MISP → Sync Actions → Feeds. Pour chaque feed activé, j'ai cliqué **Fetch and store all events**.
 
 ![MISP Administration → Jobs - tâches fetch_feed en cours et terminées](images/jobs.png)
 
@@ -136,7 +136,7 @@ IP whitelist : 192.168.126.0/24
 Commentaire  : ELK threatintel integration
 ```
 
-J'utilise la plage `/24` entière plutôt que la seule IP de la VM ELK. Plus souple si les IPs évoluent.
+J'ai utilisé la plage `/24` entière plutôt que la seule IP de la VM ELK. Plus souple si les IPs évoluent.
 
 La clé générée va dans `var.api_token` de [`../elk/filebeat-threatintel/filebeat.yml.example`](../elk/filebeat-threatintel/filebeat.yml.example). Elle ne s'affiche qu'une fois.
 

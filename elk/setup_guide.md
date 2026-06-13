@@ -67,7 +67,7 @@ J'ai réduit à 1024 Mo au lieu de 1500 Mo pour que Kibana et Logstash puissent 
 
 ### Configuration minimale
 
-Elastic 8.x auto-configure TLS et xpack.security au premier démarrage. Ne pas écraser le fichier existant. J'ajoute uniquement ces lignes en tête de `/etc/elasticsearch/elasticsearch.yml`, avant le bloc `BEGIN SECURITY AUTO CONFIGURATION` :
+Elastic 8.x auto-configure TLS et xpack.security au premier démarrage. Ne pas écraser le fichier existant. J'ai ajouté uniquement ces lignes en tête de `/etc/elasticsearch/elasticsearch.yml`, avant le bloc `BEGIN SECURITY AUTO CONFIGURATION` :
 
 ```yaml
 cluster.name: homelab-soc
@@ -75,7 +75,7 @@ node.name: elk-node-1
 discovery.type: single-node
 ```
 
-Je commente aussi `cluster.initial_master_nodes` dans le bloc auto-configuré.
+J'ai également commenté `cluster.initial_master_nodes` dans le bloc auto-configuré.
 
 ### Démarrage
 
@@ -101,7 +101,7 @@ sudo apt install kibana -y
 
 ### Configuration
 
-Fichier : `/etc/kibana/kibana.yml` - j'ajoute en bas du fichier :
+Fichier : `/etc/kibana/kibana.yml` - j'ai ajouté en bas du fichier :
 
 ```yaml
 server.host: "192.168.126.10"
@@ -143,7 +143,7 @@ sudo systemctl start kibana
 # Compter 2-3 minutes avant que Kibana soit accessible
 ```
 
-Après le premier démarrage, j'active la licence Trial dans Kibana → Stack Management → License Management → Start Trial. C'est nécessaire pour Kibana Security.
+Après le premier démarrage, j'ai activé la licence Trial dans Kibana → Stack Management → License Management → Start Trial. C'est nécessaire pour Kibana Security.
 
 ---
 
@@ -155,7 +155,7 @@ Après le premier démarrage, j'active la licence Trial dans Kibana → Stack Ma
 sudo apt install logstash -y
 ```
 
-Dans `/etc/logstash/jvm.options`, je réduis le heap :
+Dans `/etc/logstash/jvm.options`, j'ai réduit le heap :
 
 ```
 -Xms256m
@@ -164,7 +164,7 @@ Dans `/etc/logstash/jvm.options`, je réduis le heap :
 
 ### Architecture multi-pipeline
 
-J'utilise deux pipelines séparés plutôt qu'un fichier monolithique :
+J'ai mis en place deux pipelines séparés plutôt qu'un fichier monolithique :
 
 - **skoupa** : reçoit les events Beats sur le port 5044 et les envoie en interne
 - **straight-es** : route chaque event vers le bon index selon sa source
@@ -236,8 +236,6 @@ Policy `soc-policy` que j'ai configurée :
 
 Fichier JSON : [`kibana/ilm_policy.json`](kibana/ilm_policy.json)
 
-À appliquer via Kibana → Stack Management → Index Lifecycle Policies → Create policy. Ensuite je crée un index template `soc-template` avec pattern `soc-*` et `number_of_replicas: 0` pour éviter les warnings "yellow" en single-node.
+À appliquer via Kibana → Stack Management → Index Lifecycle Policies → Create policy. Ensuite j'ai créé un index template `soc-template` avec pattern `soc-*` et `number_of_replicas: 0` pour éviter les warnings "yellow" en single-node.
 
 ![ILM Policy soc-policy dans Kibana Stack Management](images/ilm_policy.png)
-
-![Index Management - indices soc-* avec phases ILM actives](images/custom_indexes.png)

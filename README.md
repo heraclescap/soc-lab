@@ -92,7 +92,9 @@ Kibana Security
 | `soc-unknown-YYYY.MM.dd` | Fallback Logstash | Events sans event.module ni agent.type connu |
 | `filebeat-8.19.16` | Filebeat threatintel / VM ELK | Data stream IOCs MISP |
 
-> J'utilise le préfixe `soc-*` et pas `logs-*` : Logstash ne peut pas écrire dans les data streams Elastic 8.x avec `op_type: index`. `soc-*` contourne le problème.
+> J'ai utilisé le préfixe `soc-*` et pas `logs-*` : Logstash ne peut pas écrire dans les data streams Elastic 8.x avec `op_type: index`. `soc-*` contourne le problème.
+
+![Index Management - indices soc-* dans Kibana](elk/images/custom_indexes.png)
 
 ---
 
@@ -104,11 +106,15 @@ Kibana Security
 | Windows Logs | `soc-winlogbeat-*` | Logs Windows/Sysmon uniquement |
 | MISP IOCs | `filebeat-*` | Threat intelligence MISP |
 
+![Data Views configurées dans Kibana Stack Management](elk/images/data_views.png)
+
+![Kibana Discover - Data View SOC Logs](docs/images/soc_logs_discover.png)
+
 ---
 
 ## Contraintes opérationnelles
 
-Je ne fais jamais tourner les 3 VMs en même temps - 16 Go ne suffisent pas. Je travaille en deux modes :
+Je n'ai jamais fait tourner les 3 VMs en même temps - 16 Go ne suffisent pas. J'ai travaillé en deux modes :
 
 - **Mode config** : ELK + MISP actifs, Filebeat threatintel tourne
 - **Mode attaque** : ELK + Victim actifs, Filebeat arrêté pour libérer ~400 Mo

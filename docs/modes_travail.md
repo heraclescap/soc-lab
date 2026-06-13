@@ -1,12 +1,12 @@
 # Comment je travaille avec le lab
 
-Je ne fais jamais tourner les 3 VMs en même temps - 16 Go de RAM ne suffisent pas. Je bascule entre deux modes selon ce que je fais.
+Je n'ai jamais fait tourner les 3 VMs en même temps - 16 Go de RAM ne suffisent pas. J'ai basculé entre deux modes selon les besoins.
 
 ---
 
 ## Mode config
 
-Je l'utilise pour mettre à jour les feeds MISP, créer ou affiner des règles de détection, analyser les IOCs.
+Je l'ai utilisé pour mettre à jour les feeds MISP, créer ou affiner des règles de détection, analyser les IOCs.
 
 ```
 VMs actives  : ELK (192.168.126.10) + MISP (192.168.126.20)
@@ -14,7 +14,7 @@ VM suspendue : Victim (192.168.126.30)
 Filebeat ELK : actif - collecte les IOCs MISP toutes les 10 min
 ```
 
-Ce que je fais en mode config :
+Ce que j'ai fait en mode config :
 - Mettre à jour les feeds MISP (Fetch and store all events)
 - Créer ou affiner des règles dans Kibana Security
 - Vérifier les nouveaux IOCs dans la Data View `MISP IOCs` (filebeat-8.19.16)
@@ -25,7 +25,7 @@ Ce que je fais en mode config :
 
 ## Mode attaque
 
-Je l'utilise pour les simulations Atomic Red Team, observer les alertes en temps réel, reconstruire des timelines.
+Je l'ai utilisé pour les simulations Atomic Red Team, observer les alertes en temps réel, reconstruire des timelines.
 
 ```
 VMs actives  : ELK (192.168.126.10) + Victim (192.168.126.30)
@@ -33,15 +33,13 @@ VM suspendue : MISP (192.168.126.20)
 Filebeat ELK : arrêté - libère ~400 Mo de RAM
 ```
 
-Ce que je fais en mode attaque :
+Ce que j'ai fait en mode attaque :
 - Lancer une technique Atomic Red Team (PowerShell admin sur VM Victim)
 - Observer les alertes Kibana Security en temps réel
 - Reconstruire la timeline dans Kibana → Timeline
 - Corréler Event IDs Sysmon → technique MITRE ATT&CK
 - Écrire une règle EQL si aucune alerte n'est déclenchée (voir repo `soc-lab-detection-engineering`)
 - Restaurer le snapshot "clean-sysmon-winlogbeat" avant la prochaine simulation
-
-![Kibana Discover - logs soc-* en mode attaque](images/soc_logs_discover.png)
 
 ---
 
@@ -69,7 +67,7 @@ sudo journalctl -fu filebeat | grep "events published"  # vérifier que la colle
 
 Puis dans VMware : suspendre Victim, reprendre MISP.
 
-> VMware → VM → Suspend prend 2 secondes. La reprendre prend 5-10 secondes, contre 2-3 minutes pour un boot complet. Je suspends toujours plutôt que d'éteindre.
+> VMware → VM → Suspend prend 2 secondes. La reprendre prend 5-10 secondes, contre 2-3 minutes pour un boot complet. J'ai toujours suspendu plutôt qu'éteint.
 
 ---
 

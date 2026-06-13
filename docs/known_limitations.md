@@ -68,7 +68,7 @@ En mode attaque, Filebeat tourne encore et consomme ~400 Mo.
 sudo systemctl stop filebeat
 ```
 
-Autre cause : 1696 règles prebuilt actives toutes les 5 minutes. Je les passe à 1h via Kibana Security → Rules → Elastic rules → Select all → Bulk actions → Update rule schedules.
+Autre cause : 1696 règles prebuilt actives toutes les 5 minutes. Je les ai passées à 1h via Kibana Security → Rules → Elastic rules → Select all → Bulk actions → Update rule schedules.
 
 ![Règles prebuilt Elastic dans Kibana Security](images/prebuilt_rules.png)
 

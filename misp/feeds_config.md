@@ -26,7 +26,7 @@ Les feeds que j'ai activés dans MISP → Sync Actions → Feeds, et pourquoi.
 | Bambenek C2 | Redondant avec Feodo pour les C2 que je couvre dans ce lab. |
 | OpenPhish | URLs phishing uniquement - moins utile pour la détection réseau Sysmon Event ID 3. |
 | Emerging Threats | Format snort/suricata, non compatible avec le module threatintel Filebeat. |
-| Autres feeds MISP par défaut | Non vérifiés pour leur taille. Je n'active rien sans vérifier d'abord l'impact sur les 15 Go de disque. |
+| Autres feeds MISP par défaut | Non vérifiés pour leur taille. Je n'ai rien activé sans vérifier d'abord l'impact sur les 15 Go de disque. |
 
 ---
 
