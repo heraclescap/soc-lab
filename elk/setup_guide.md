@@ -220,9 +220,9 @@ Kibana → Stack Management → Data Views → Create data view :
 |-----|---------------|-----------|
 | SOC Logs | `soc-*` | @timestamp |
 | Windows Logs | `soc-winlogbeat-*` | @timestamp |
-| MISP IOCs | `filebeat-*` | event.ingested |
+| MISP IOCs | `filebeat-*` | @timestamp |
 
-Pour MISP IOCs, j'utilise `event.ingested` et pas `@timestamp` : certains IOCs ont des timestamps qui datent de 2014 et disparaissent de la vue par défaut.
+![Data Views configurées dans Kibana Stack Management](images/data_views.png)
 
 ---
 
@@ -237,3 +237,7 @@ Policy `soc-policy` que j'ai configurée :
 Fichier JSON : [`kibana/ilm_policy.json`](kibana/ilm_policy.json)
 
 À appliquer via Kibana → Stack Management → Index Lifecycle Policies → Create policy. Ensuite je crée un index template `soc-template` avec pattern `soc-*` et `number_of_replicas: 0` pour éviter les warnings "yellow" en single-node.
+
+![ILM Policy soc-policy dans Kibana Stack Management](images/ilm_policy.png)
+
+![Index Management - indices soc-* avec phases ILM actives](images/custom_indexes.png)

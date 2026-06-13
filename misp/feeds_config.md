@@ -14,6 +14,8 @@ Les feeds que j'ai activés dans MISP → Sync Actions → Feeds, et pourquoi.
 | Threatfox | MISP | MISP JSON | IOCs récents multi-types (IP, domaine, hash, URL). Complète CIRCL sur les menaces récentes. |
 | MISP Warning Lists | - | - | Obligatoire. Exclut les faux positifs : CDNs, DNS publics (8.8.8.8), IPs cloud AWS/Azure/GCP. |
 
+![Feeds activés dans MISP - Sync Actions](images/feeds.png)
+
 ---
 
 ## Feeds que j'ai écartés
@@ -39,6 +41,8 @@ fetch_feeds  : Frequency 24h
 cache_feeds  : Frequency 24h
 ```
 
+![Scheduled Tasks MISP - fetch_feeds et cache_feeds à 24h](images/scheduled_tasks.png)
+
 ---
 
 ## Volume approximatif après ingestion initiale
@@ -50,6 +54,10 @@ cache_feeds  : Frequency 24h
 | URLhaus | ~5 000+ | Majoritairement URLs/domaines |
 | Threatfox | ~3 000+ | Multi-types récents |
 | **Total threat.indicator.ip** | **> 22 000** | Champ peuplé par les ingest pipelines Filebeat |
+
+![Events MISP ingérés depuis les feeds actifs](images/events.png)
+
+![Attributs IOCs dans MISP - détail des IOCs par catégorie et type](images/attributes.png)
 
 Le volume exact dépend de la fenêtre `var.first_interval` (720h = 30 jours). Pour vérifier :
 

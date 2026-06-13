@@ -6,9 +6,9 @@ Les comportements qui surprennent, et comment les gérer. Version orientée usag
 
 ## "Je ne vois aucun IOC dans Kibana Discover"
 
-La fenêtre temporelle par défaut est "Last 15 minutes". Les `@timestamp` des IOCs MISP correspondent à leur date de création dans le feed source, parfois 2014.
+L'ingestion initiale prend quelques minutes après le premier démarrage de Filebeat. Si la Data View `MISP IOCs` est vide, vérifier que Filebeat threatintel a bien publié des events (`sudo journalctl -fu filebeat | grep "events published"`). Une fois les IOCs peuplés, ils apparaissent normalement avec `@timestamp`.
 
-Deux solutions : passer à "All time" dans Kibana Discover, ou éditer la Data View `MISP IOCs` pour utiliser `event.ingested` comme timestamp field.
+![Kibana Discover - Data View MISP IOCs après ingestion](images/kibana_ioc.png)
 
 ---
 
@@ -41,6 +41,10 @@ Je vérifie dans cet ordre :
 3. **Filtre temporel** : le filtre `@timestamp >= "now-30d/d"` exclut les IOCs anciens. Si `threat.indicator.ip` est vide, les ingest pipelines n'ont pas tourné - vérifier que le Filebeat threatintel utilise bien `output.elasticsearch`
 4. **Règle désactivée** : Kibana Security → Rules → vérifier que la règle est "Enabled"
 
+![Configuration de la règle Indicator Match dans Kibana Security](images/indicator_rule.png)
+
+![Alertes MISP Indicator Match dans Kibana Security](images/alert_indicator_match.png)
+
 ---
 
 ## "La création de règle dans Kibana Security échoue silencieusement"
@@ -65,6 +69,8 @@ sudo systemctl stop filebeat
 ```
 
 Autre cause : 1696 règles prebuilt actives toutes les 5 minutes. Je les passe à 1h via Kibana Security → Rules → Elastic rules → Select all → Bulk actions → Update rule schedules.
+
+![Règles prebuilt Elastic dans Kibana Security](images/prebuilt_rules.png)
 
 ---
 

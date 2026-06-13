@@ -119,6 +119,8 @@ Changer le mot de passe immédiatement : MISP → Administration → Edit profil
 
 J'active les feeds dans MISP → Sync Actions → Feeds. Pour chaque feed activé, je clique **Fetch and store all events**.
 
+![MISP Administration → Jobs - tâches fetch_feed en cours et terminées](images/jobs.png)
+
 Scheduled Tasks pour la mise à jour automatique :
 MISP → Administration → Scheduled Tasks → `fetch_feeds` + `cache_feeds` en Frequency 24h.
 
@@ -137,6 +139,8 @@ Commentaire  : ELK threatintel integration
 J'utilise la plage `/24` entière plutôt que la seule IP de la VM ELK. Plus souple si les IPs évoluent.
 
 La clé générée va dans `var.api_token` de [`../elk/filebeat-threatintel/filebeat.yml.example`](../elk/filebeat-threatintel/filebeat.yml.example). Elle ne s'affiche qu'une fois.
+
+![Interface de génération de la clé API MISP](images/auth_keys.png)
 
 ---
 

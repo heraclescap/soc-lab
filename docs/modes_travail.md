@@ -41,6 +41,8 @@ Ce que je fais en mode attaque :
 - Écrire une règle EQL si aucune alerte n'est déclenchée (voir repo `soc-lab-detection-engineering`)
 - Restaurer le snapshot "clean-sysmon-winlogbeat" avant la prochaine simulation
 
+![Kibana Discover - logs soc-* en mode attaque](images/soc_logs_discover.png)
+
 ---
 
 ## Commandes de basculement
