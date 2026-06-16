@@ -1,28 +1,3 @@
-# Emplacement réel : /etc/filebeat/filebeat.yml  (sur VM ELK — 192.168.126.10)
-#
-# Configuration Filebeat pour le module threatintel MISP.
-# Ce Filebeat tourne sur VM ELK, PAS sur VM MISP.
-#
-# Pourquoi output.elasticsearch direct (pas output.logstash) :
-#   Le module threatintel s'appuie sur des ingest pipelines Elasticsearch pour
-#   normaliser les IOCs MISP en champs ECS (threat.indicator.ip, threat.indicator.type, etc.)
-#   Ces ingest pipelines s'exécutent UNIQUEMENT côté Elasticsearch.
-#   Si l'output est Logstash, les pipelines ne s'exécutent jamais → threat.indicator.ip
-#   reste vide → la règle Indicator Match dans Kibana Security ne matche rien.
-#
-# Pourquoi var.first_interval: 720h (30 jours) :
-#   Couvre les feeds récents sans refetcher tout l'historique (certains feeds remontent
-#   à 2014). Après le premier run, le registry Filebeat maintient le cursor et seuls
-#   les nouveaux IOCs sont récupérés.
-#
-# Pourquoi /events/restSearch (pas /attributes/restSearch) :
-#   Le module threatintel parse les attributs depuis la structure imbriquée Event.Attribute.
-#   L'endpoint /attributes/restSearch retourne une structure plate incompatible avec le
-#   split du module — aucun IOC ne serait créé.
-#
-# Après modification, charger les ingest pipelines avant le premier démarrage :
-#   sudo filebeat setup --pipelines --modules threatintel
-
 filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
   reload.enabled: false
