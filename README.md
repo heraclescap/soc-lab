@@ -1,4 +1,4 @@
-# SOC Lab - Homelab SIEM + Threat Intel
+# Homelab SOC - SIEM + Threat Intel
 
 J'ai monté ce lab pour apprendre à détecter des attaques en conditions réelles, pas sur des démos packagées. Tout tourne sur ma machine Windows 11 Pro via VMware Workstation, avec 16 Go de RAM et 50 Go de disque. Stack ELK 8.19.16 + MISP 2.4 + Sysmon + Atomic Red Team sur VMnet8 NAT.
 
